@@ -30,11 +30,11 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Configurar conexión con Pool de MySQL
 const db = mysql.createPool({
-  host: "bm0kcrakwqbjksbqwjvt-mysql.services.clever-cloud.com",
-  user: "uyqhivph1w82m3gh",
-  password: "pZ17769C5qwqKojWVcdR",
-  database: "bm0kcrakwqbjksbqwjvt",
-  port: 3306,
+  host: "bwbxqngh9d4wr6bnopb3-mysql.services.clever-cloud.com",
+  user: "uojgcj0odvcjvrps",
+  password: "U1Ko8svIUDDEPhSDxvJ",
+  database: "bwbxqngh9d4wr6bnopb3",
+  port: 20996,
   waitForConnections: true,
   connectionLimit: 10, // Número máximo de conexiones activas
   queueLimit: 0,
@@ -97,27 +97,41 @@ app.get("/products/:id", (req, res) => {
 
 // Endpoint para crear un producto
 app.post("/products", (req, res) => {
-  const { name, price, image, description } = req.body;
+  // Añade currency a la desestructuración
+  const { name, price, image, description, currency } = req.body;
+
+  // Ajusta la consulta para insertar también currency
   db.query(
-    "INSERT INTO products (name, price, image, description) VALUES (?, ?, ?, ?)",
-    [name, price, image, description],
+    "INSERT INTO products (name, price, image, description, currency) VALUES (?, ?, ?, ?, ?)",
+    [name, price, image, description, currency], // <-- 5 valores
     (err, result) => {
       if (err) {
         console.error("❌ Error al insertar producto:", err.message);
         return res.status(500).json({ error: "Error al insertar producto" });
       }
-      res.json({ id: result.insertId, name, price, image, description });
+      // Retorna el objeto con currency incluido
+      res.json({
+        id: result.insertId,
+        name,
+        price,
+        image,
+        description,
+        currency,
+      });
     }
   );
 });
 
+
 // Endpoint para actualizar un producto
 app.put("/products/:id", (req, res) => {
   const { id } = req.params;
-  const { name, price, image, description } = req.body;
+  // Añade currency a la desestructuración
+  const { name, price, image, description, currency } = req.body;
+
   db.query(
-    "UPDATE products SET name = ?, price = ?, image = ?, description = ? WHERE id = ?",
-    [name, price, image, description, id],
+    "UPDATE products SET name = ?, price = ?, image = ?, description = ?, currency = ? WHERE id = ?",
+    [name, price, image, description, currency, id], // <-- 6 valores
     (err, result) => {
       if (err) {
         console.error("❌ Error al actualizar producto:", err.message);
@@ -126,10 +140,12 @@ app.put("/products/:id", (req, res) => {
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: "Producto no encontrado" });
       }
-      res.json({ id, name, price, image, description });
+      // Devuelve currency en la respuesta
+      res.json({ id, name, price, image, description, currency });
     }
   );
 });
+
 
 // Endpoint para eliminar un producto
 app.delete("/products/:id", (req, res) => {
@@ -142,7 +158,7 @@ app.delete("/products/:id", (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Producto no encontrado" });
     }
-    res.json({ message: "✅ Producto eliminado correctamente" });
+    res.json({ message: " Producto eliminado correctamente" });
   });
 });
 
